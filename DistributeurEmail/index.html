@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Distributeur-Email</title>
+
+<style>
+body {
+  background: #020617;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.box {
+  background: #020617;
+  padding: 30px;
+  border-radius: 12px;
+  width: 340px;
+  text-align: center;
+  box-shadow: 0 0 40px #000;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 17px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.green { background: #16a34a; color: white; }
+.red { background: #dc2626; color: white; }
+
+button:hover {
+  transform: scale(1.03);
+  filter: brightness(1.1);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.active {
+  box-shadow: 0 0 15px currentColor, 0 0 30px currentColor;
+}
+
+#panel { display: none; }
+#status { margin-top: 15px; }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Distributeur-Email</h2>
+
+  <div id="login">
+    <input id="code" type="password" placeholder="Code d’accès" />
+    <button onclick="login()">Entrer</button>
+  </div>
+
+  <div id="panel">
+    <button id="btnOn" class="green" onclick="toggle(true)">🟢 ACTIVER</button>
+    <button id="btnOff" class="red" onclick="toggle(false)">🔴 DÉSACTIVER</button>
+    <div id="status"></div>
+  </div>
+</div>
+
+<script>
+const CODE = "1551";
+
+document.getElementById("code").addEventListener("keydown", e => {
+  if (e.key === "Enter") login();
+});
+
+function login() {
+  if (document.getElementById("code").value === CODE) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("panel").style.display = "block";
+  } else {
+    alert("Code incorrect");
+  }
+}
+
+async function toggle(active) {
+  const res = await fetch("/.netlify/functions/toggle-service", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ active })
+  });
+
+  if (!res.ok) {
+    document.getElementById("status").innerText =
+      "❌ Erreur serveur";
+    return;
+  }
+
+  const data = await res.json();
+
+  document.getElementById("status").innerText = data.message;
+
+  document.getElementById("btnOn").classList.remove("active");
+  document.getElementById("btnOff").classList.remove("active");
+
+  if (active) {
+    document.getElementById("btnOn").classList.add("active");
+  } else {
+    document.getElementById("btnOff").classList.add("active");
+  }
+}
+</script>
+
+</body>
+</html>
